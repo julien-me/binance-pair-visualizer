@@ -20,21 +20,6 @@ interface Ticker {
   count: number;
 }
 
-interface CurrencyDataProps {
-  data: Ticker;
-  children: JSX.Element[];
-}
-function CurrencyData({ data, children }: CurrencyDataProps) {
-  return (
-    <>
-      <div>Currency {data.symbol}</div>
-      <div className="border-4 border-solid flex flex-col bg-red-200 space-y-3">
-        {children}
-      </div>
-    </>
-  );
-}
-
 const tickerTableHeaderNames = [
   "symbol",
   "price change",
@@ -52,39 +37,6 @@ const tickerTableHeaderNames = [
   "last id",
   "count",
 ];
-
-interface TickerPairTableProps {
-  data: Ticker[];
-}
-function TickerPairTable({ data }: TickerPairTableProps) {
-  return (
-    <>
-      <div className="text-center"> Ticker</div>
-      <div className="w-screen overflow-scroll">
-        <table className="border-2 border-solid bg-blue-200">
-          <thead>
-            <tr>
-              {tickerTableHeaderNames.map((name) => (
-                <th key={name} className="text-gray-600">
-                  {name}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((tickerData) => (
-              <tr key={tickerData.symbol}>
-                {Object.values(tickerData).map((e, i) => (
-                  <td key={i}>{e}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
 
 interface TwentyFourHourTicker {
   symbol: string;
@@ -134,21 +86,25 @@ const twentyFourHourTickerHeaderNames = [
   "count",
 ];
 
-interface TwentyFourHourTickerPairTableProps {
-  data: TwentyFourHourTicker[];
+interface PairTableProps<T> {
+  data: T[];
+  name: string;
+  headerNames: string[];
 }
 
-function TwentyFourHourTickerPairTable({
+function PairTable<T extends { symbol: string }>({
   data,
-}: TwentyFourHourTickerPairTableProps) {
+  name,
+  headerNames,
+}: PairTableProps<T>) {
   return (
     <>
-      <div className="text-center">24h Ticker</div>
-      <div className="w-screen overflow-scroll">
+      <div className="text-center">{name}</div>
+      <div className="overflow-scroll">
         <table className="border border-solid bg-green-200">
           <thead>
             <tr>
-              {twentyFourHourTickerHeaderNames.map((name) => (
+              {headerNames.map((name) => (
                 <th key={name} className="text-gray-600">
                   {name}
                 </th>
@@ -156,9 +112,9 @@ function TwentyFourHourTickerPairTable({
             </tr>
           </thead>
           <tbody>
-            {data.map((twentyFourHourTickerData) => (
-              <tr key={twentyFourHourTickerData.symbol}>
-                {Object.values(twentyFourHourTickerData).map((e, i) => (
+            {data.map((item) => (
+              <tr key={item.symbol}>
+                {Object.values(item).map((e, i) => (
                   <td key={i}>{e}</td>
                 ))}
               </tr>
@@ -199,8 +155,8 @@ function TradesTable({ data, symbol }: TradesTableProps) {
   return (
     <div className="flex flex-col">
       <div className="text-center">{symbol}</div>
-      <div className="h-screen overflow-scroll">
-        <table className="border border-solid bg-yellow-200">
+      <div className="overflow-auto h-4/6">
+        <table className=" border border-solid bg-yellow-200">
           <thead className="sticky top-0 bg-yellow-200">
             <tr>
               {recentTradesHeaderNames.map((name) => (
@@ -241,6 +197,17 @@ function PairTrades({ children }: PairTradesProps) {
   );
 }
 
+interface DashboardProps {
+  children: JSX.Element[];
+}
+function Dashboard({ children }: DashboardProps) {
+  return (
+    <div className="h-full flex flex-col bg-red-600 w-screen p-8">
+      {children}
+    </div>
+  );
+}
+
 export default function PairCurrencyVisualizer() {
   const [isLoading, setLoading] = useState(true);
   const [symbols, setSymbols] = useState<string[]>([]);
@@ -269,7 +236,6 @@ export default function PairCurrencyVisualizer() {
       console.error("Error: Same currency");
       return;
     }
-    // TODO: Handle error
     fetch(
       `https://api.binance.com/api/v3/ticker?symbols=%5B%22${currency1Tmp}%22,%22${currency2Tmp}%22%5D`
     )
@@ -318,11 +284,14 @@ export default function PairCurrencyVisualizer() {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <>
-      <form onSubmit={(e) => handleSubmit(e)}>
+    <div className="flex flex-col h-full">
+      <form
+        onSubmit={(e) => handleSubmit(e)}
+        className="flex justify-center m-8 gap-4"
+      >
         <select
           name="currency1"
-          defaultValue={symbols.length ? symbols[0] : ""}
+          defaultValue={symbols.length > 1 ? symbols[0] : ""}
         >
           {symbols.map((symbol) => (
             <option key={symbol} value={symbol}>
@@ -332,7 +301,7 @@ export default function PairCurrencyVisualizer() {
         </select>
         <select
           name="currency2"
-          defaultValue={symbols.length ? symbols[0] : ""}
+          defaultValue={symbols.length > 1 ? symbols[1] : ""}
         >
           {symbols.map((symbol) => (
             <option key={symbol} value={symbol}>
@@ -346,9 +315,17 @@ export default function PairCurrencyVisualizer() {
         twentyFourHourTickerData &&
         firstCurrencyTradesData &&
         secondCurrencyTradesData && (
-          <>
-            <TickerPairTable data={tickerData} />
-            <TwentyFourHourTickerPairTable data={twentyFourHourTickerData} />
+          <Dashboard>
+            <PairTable
+              data={tickerData}
+              name="Ticker"
+              headerNames={tickerTableHeaderNames}
+            />
+            <PairTable
+              data={twentyFourHourTickerData}
+              name="24 Ticker"
+              headerNames={twentyFourHourTickerHeaderNames}
+            />
             <PairTrades>
               <TradesTable
                 data={firstCurrencyTradesData}
@@ -359,8 +336,8 @@ export default function PairCurrencyVisualizer() {
                 symbol={secondSymbol}
               />
             </PairTrades>
-          </>
+          </Dashboard>
         )}
-    </>
+    </div>
   );
 }
