@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface Ticker {
   symbol: string;
@@ -59,25 +59,27 @@ interface TickerPairTableProps {
 function TickerPairTable({ data }: TickerPairTableProps) {
   return (
     <>
-      <div> Ticker</div>
-      <table className="border-2 border-solid bg-blue-200">
-        <thead>
-          <tr>
-            {tickerTableHeaderNames.map((name) => (
-              <th className="text-gray-600">{name}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((tickerData) => (
+      <div className="text-center"> Ticker</div>
+      <div className="w-screen overflow-scroll">
+        <table className="border-2 border-solid bg-blue-200">
+          <thead>
             <tr>
-              {Object.values(tickerData).map((e) => (
-                <td>{e}</td>
+              {tickerTableHeaderNames.map((name) => (
+                <th className="text-gray-600">{name}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((tickerData) => (
+              <tr>
+                {Object.values(tickerData).map((e) => (
+                  <td>{e}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
@@ -140,25 +142,27 @@ function TwentyFourHourTickerPairTable({
 }: TwentyFourHourTickerPairTableProps) {
   return (
     <>
-      <div>24h Ticker</div>
-      <table className="border border-solid bg-green-200">
-        <thead>
-          <tr>
-            {twentyFourHourTickerHeaderNames.map((name) => (
-              <th className="text-gray-600">{name}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((twentyFourHourTickerData) => (
+      <div className="text-center">24h Ticker</div>
+      <div className="w-screen overflow-scroll">
+        <table className="border border-solid bg-green-200">
+          <thead>
             <tr>
-              {Object.values(twentyFourHourTickerData).map((e) => (
-                <td>{e}</td>
+              {twentyFourHourTickerHeaderNames.map((name) => (
+                <th className="text-gray-600">{name}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((twentyFourHourTickerData) => (
+              <tr>
+                {Object.values(twentyFourHourTickerData).map((e) => (
+                  <td>{e}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
@@ -173,53 +177,66 @@ interface Trades {
   isBestMatch: boolean;
 }
 
+const recentTradesHeaderNames = [
+  "id",
+  "price",
+  "quantity",
+  "quote quantity",
+  "time",
+  "is buyer maker",
+  "is best match",
+];
+
 interface TradesTableProps {
-  data: Trades;
+  data: Trades[];
+  symbol: string;
 }
 
-function TradesTable({ data }: TradesTableProps) {
+function TradesTable({ data, symbol }: TradesTableProps) {
   return (
-    <table className="border border-solid bg-yellow-200">
-      <thead>
-        <tr>
-          <th>Recent Trades</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>id</td>
-          <td>{data.id}</td>
-        </tr>
-        <tr>
-          <td>price</td>
-          <td>{data.price}</td>
-        </tr>
-        <tr>
-          <td>quantity</td>
-          <td>{data.qty}</td>
-        </tr>
-        <tr>
-          <td>quote quantity</td>
-          <td>{data.quoteQty}</td>
-        </tr>
-        <tr>
-          <td>time</td>
-          <td>{data.time}</td>
-        </tr>
-        <tr>
-          <td>is buyer maker</td>
-          <td>{data.isBuyerMaker}</td>
-        </tr>
-        <tr>
-          <td>is best match</td>
-          <td>{data.isBestMatch}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div className="flex flex-col">
+      <div className="text-center">{symbol}</div>
+      <div className="h-screen overflow-scroll">
+        <table className="border border-solid bg-yellow-200">
+          <thead className="sticky top-0 bg-yellow-200">
+            <tr>
+              {recentTradesHeaderNames.map((name) => (
+                <th className="text-gray-600">{name}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((recentTradesData) => (
+              <tr>
+                {Object.values(recentTradesData).map((e) => (
+                  <td>{e}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
+
+interface PairTradesProps {
+  children: JSX.Element[];
+}
+
+function PairTrades({ children }: PairTradesProps) {
+  return (
+    <div>
+      <div className="text-center">Recent Trades</div>
+      <div className="flex gap-4">{children}</div>
+    </div>
+  );
+}
+
 export default function PairCurrencyVisualizer() {
   const [tickerData, setMarketData] = useState<Ticker[] | null>(null);
+  const [firstSymbol, setFirstSymbol] = useState<string>("");
+  const [secondSymbol, setSecondSymbol] = useState<string>("");
   const [twentyFourHourTickerData, setTwentyFourHourTickerData] = useState<
     TwentyFourHourTicker[] | null
   >(null);
@@ -232,30 +249,33 @@ export default function PairCurrencyVisualizer() {
 
   function handleSubmit(formData: FormData) {
     // TODO: prevent default
-    const currency1 = formData.get("currency1");
-    const currency2 = formData.get("currency2");
-    if (currency1 === currency2) {
+    const currency1Tmp = formData.get("currency1")?.toString();
+    const currency2Tmp = formData.get("currency2")?.toString();
+    setFirstSymbol(currency1Tmp || "BTCUSDT");
+    setSecondSymbol(currency2Tmp || "BTCUSDT");
+
+    if (currency1Tmp === currency2Tmp) {
       console.error("Error: Same currency");
       return;
     }
     // TODO: Handle error
     fetch(
-      `https://api.binance.com/api/v3/ticker?symbols=%5B%22${currency1}%22,%22${currency2}%22%5D`
+      `https://api.binance.com/api/v3/ticker?symbols=%5B%22${currency1Tmp}%22,%22${currency2Tmp}%22%5D`
     )
       .then((response) => response.json())
       .then((data) => setMarketData(data));
 
     fetch(
-      `https://api.binance.com/api/v3/ticker/24hr?symbols=%5B%22${currency1}%22,%22${currency2}%22%5D`
+      `https://api.binance.com/api/v3/ticker/24hr?symbols=%5B%22${currency1Tmp}%22,%22${currency2Tmp}%22%5D`
     )
       .then((response) => response.json())
       .then((data) => setTwentyFourHourTickerData(data));
 
-    fetch(`https://api.binance.com/api/v3/trades?symbol=${currency1}`)
+    fetch(`https://api.binance.com/api/v3/trades?symbol=${currency1Tmp}`)
       .then((response) => response.json())
       .then((data) => setFirstCurrencyTradesData(data));
 
-    fetch(`https://api.binance.com/api/v3/trades?symbol=${currency2}`)
+    fetch(`https://api.binance.com/api/v3/trades?symbol=${currency2Tmp}`)
       .then((response) => response.json())
       .then((data) => setSecondCurrencyTradesData(data));
     console.log("hello");
@@ -281,16 +301,16 @@ export default function PairCurrencyVisualizer() {
           <>
             <TickerPairTable data={tickerData} />
             <TwentyFourHourTickerPairTable data={twentyFourHourTickerData} />
-            {/* <CurrencyData data={tickerData[0]}>
-              <TickerTableRow data={tickerData[0]} />
-              <TwentyFourHourTickerTable data={twentyFourHourTickerData[0]} />
-              <TradesTable data={firstCurrencyTradesData[0]} />
-            </CurrencyData>
-            <CurrencyData data={tickerData[1]}>
-              <TickerTableRow data={tickerData[1]} />
-              <TwentyFourHourTickerTable data={twentyFourHourTickerData[1]} />
-              <TradesTable data={secondCurrencyTradesData[0]} />
-            </CurrencyData> */}
+            <PairTrades>
+              <TradesTable
+                data={firstCurrencyTradesData}
+                symbol={firstSymbol}
+              />
+              <TradesTable
+                data={secondCurrencyTradesData}
+                symbol={secondSymbol}
+              />
+            </PairTrades>
           </>
         )}
     </>
