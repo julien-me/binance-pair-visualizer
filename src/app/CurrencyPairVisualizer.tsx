@@ -98,14 +98,14 @@ function PairTable<T extends { symbol: string }>({
   headerNames,
 }: PairTableProps<T>) {
   return (
-    <>
+    <div className="h-full">
       <div className="text-center">{name}</div>
       <div className="overflow-scroll">
-        <table className="border border-solid bg-green-200">
-          <thead>
+        <table className="border-b-2">
+          <thead className="bg-gray-200">
             <tr>
               {headerNames.map((name) => (
-                <th key={name} className="text-gray-600">
+                <th key={name} className="text-gray-600 p-1">
                   {name}
                 </th>
               ))}
@@ -115,14 +115,16 @@ function PairTable<T extends { symbol: string }>({
             {data.map((item) => (
               <tr key={item.symbol}>
                 {Object.values(item).map((e, i) => (
-                  <td key={i}>{e}</td>
+                  <td key={i} className="p-3">
+                    {e}
+                  </td>
                 ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -153,14 +155,14 @@ interface TradesTableProps {
 
 function TradesTable({ data, symbol }: TradesTableProps) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       <div className="text-center">{symbol}</div>
-      <div className="overflow-auto h-4/6">
-        <table className=" border border-solid bg-yellow-200">
-          <thead className="sticky top-0 bg-yellow-200">
+      <div className="h-52 overflow-scroll">
+        <table className="border-b-2 bg-white">
+          <thead className="sticky top-0 bg-gray-200">
             <tr>
               {recentTradesHeaderNames.map((name) => (
-                <th key={name} className="text-gray-600">
+                <th key={name} className="text-gray-600 p-1">
                   {name}
                 </th>
               ))}
@@ -170,7 +172,9 @@ function TradesTable({ data, symbol }: TradesTableProps) {
             {data.map((recentTradesData) => (
               <tr key={recentTradesData.id}>
                 {Object.values(recentTradesData).map((e, i) => (
-                  <td key={i}>{e}</td>
+                  <td key={i} className="p-3">
+                    {e}
+                  </td>
                 ))}
               </tr>
             ))}
@@ -185,12 +189,12 @@ interface Symbol {
   symbol: string;
 }
 interface PairTradesProps {
-  children: JSX.Element[];
+  children: React.ReactNode;
 }
 
 function PairTrades({ children }: PairTradesProps) {
   return (
-    <div>
+    <div className="flex flex-col h-full">
       <div className="text-center">Recent Trades</div>
       <div className="flex gap-4">{children}</div>
     </div>
@@ -198,14 +202,10 @@ function PairTrades({ children }: PairTradesProps) {
 }
 
 interface DashboardProps {
-  children: JSX.Element[];
+  children: React.ReactNode;
 }
 function Dashboard({ children }: DashboardProps) {
-  return (
-    <div className="h-full flex flex-col bg-red-600 w-screen p-8">
-      {children}
-    </div>
-  );
+  return <div className="flex flex-grow flex-col w-screen p-4">{children}</div>;
 }
 
 export default function PairCurrencyVisualizer() {
@@ -284,10 +284,10 @@ export default function PairCurrencyVisualizer() {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-screen">
       <form
         onSubmit={(e) => handleSubmit(e)}
-        className="flex justify-center m-8 gap-4"
+        className="flex justify-center m-8 gap-4 h-6"
       >
         <select
           name="currency1"
@@ -311,33 +311,31 @@ export default function PairCurrencyVisualizer() {
         </select>
         <button type="submit">Get Market Data</button>
       </form>
-      {tickerData &&
-        twentyFourHourTickerData &&
-        firstCurrencyTradesData &&
-        secondCurrencyTradesData && (
-          <Dashboard>
-            <PairTable
-              data={tickerData}
-              name="Ticker"
-              headerNames={tickerTableHeaderNames}
-            />
-            <PairTable
-              data={twentyFourHourTickerData}
-              name="24 Ticker"
-              headerNames={twentyFourHourTickerHeaderNames}
-            />
-            <PairTrades>
-              <TradesTable
-                data={firstCurrencyTradesData}
-                symbol={firstSymbol}
-              />
-              <TradesTable
-                data={secondCurrencyTradesData}
-                symbol={secondSymbol}
-              />
-            </PairTrades>
-          </Dashboard>
+      <Dashboard>
+        {tickerData && (
+          <PairTable
+            data={tickerData}
+            name="Ticker"
+            headerNames={tickerTableHeaderNames}
+          />
         )}
+        {twentyFourHourTickerData && (
+          <PairTable
+            data={twentyFourHourTickerData}
+            name="24 Ticker"
+            headerNames={twentyFourHourTickerHeaderNames}
+          />
+        )}
+        {firstCurrencyTradesData && secondCurrencyTradesData && (
+          <PairTrades>
+            <TradesTable data={firstCurrencyTradesData} symbol={firstSymbol} />
+            <TradesTable
+              data={secondCurrencyTradesData}
+              symbol={secondSymbol}
+            />
+          </PairTrades>
+        )}
+      </Dashboard>
     </div>
   );
 }
