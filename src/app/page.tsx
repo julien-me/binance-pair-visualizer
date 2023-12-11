@@ -1,5 +1,9 @@
-import Image from "next/image";
+import PairCurrencyVisualizer from "./CurrencyPairVisualizer";
 
-export default function Home() {
-  return <div>bro</div>;
+export default async function Home() {
+  return (
+    <>
+      <PairCurrencyVisualizer />
+    </>
+  );
 }
