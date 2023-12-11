@@ -28,82 +28,57 @@ function CurrencyData({ data, children }: CurrencyDataProps) {
   return (
     <>
       <div>Currency {data.symbol}</div>
-      <div className="border-4 border-solid flex">{children}</div>
+      <div className="border-4 border-solid flex flex-col bg-red-200 space-y-3">
+        {children}
+      </div>
     </>
   );
 }
 
-interface TickerTableProps {
-  data: Ticker;
-}
+const tickerTableHeaderNames = [
+  "symbol",
+  "price change",
+  "price change percent",
+  "weighted average price",
+  "open price",
+  "high price",
+  "low price",
+  "last price",
+  "volume",
+  "quote volume",
+  "open time",
+  "close time",
+  "first id",
+  "last id",
+  "count",
+];
 
-function TickerTable({ data }: TickerTableProps) {
+interface TickerPairTableProps {
+  data: Ticker[];
+}
+function TickerPairTable({ data }: TickerPairTableProps) {
   return (
-    <table className="border-2 border-solid">
-      <thead>
-        <tr>
-          <th>Ticker</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>priceChange</td>
-          <td>{data.priceChange}</td>
-        </tr>
-        <tr>
-          <td>priceChangePercent</td>
-          <td>{data.priceChangePercent}</td>
-        </tr>
-        <tr>
-          <td>weightedAvgPrice</td>
-          <td>{data.weightedAvgPrice}</td>
-        </tr>
-        <tr>
-          <td>openPrice</td>
-          <td>{data.openPrice}</td>
-        </tr>
-        <tr>
-          <td>highPrice</td>
-          <td>{data.highPrice}</td>
-        </tr>
-        <tr>
-          <td>lowPrice</td>
-          <td>{data.lowPrice}</td>
-        </tr>
-        <tr>
-          <td>lastPrice</td>
-          <td>{data.lastPrice}</td>
-        </tr>
-        <tr>
-          <td>volume</td>
-          <td>{data.volume}</td>
-        </tr>
-        <tr>
-          <td>quoteVolume</td>
-          <td>{data.quoteVolume}</td>
-        </tr>
-        <tr>
-          <td>openTime</td>
-          <td>{data.openTime}</td>
-        </tr>
-        <tr>
-          <td>closeTime</td>
-          <td>{data.closeTime}</td>
-        </tr>
-        <tr>
-          <td>firstId</td>
-          <td>{data.firstId}</td>
-        </tr>
-        <tr>
-          <td>lastId</td>
-          <td>{data.lastId}</td>
-        </tr>
-        <tr>
-          <td>count</td>
-          <td>{data.count}</td>
-        </tr>
-      </tbody>
-    </table>
+    <>
+      <div> Ticker</div>
+      <table className="border-2 border-solid bg-blue-200">
+        <thead>
+          <tr>
+            {tickerTableHeaderNames.map((name) => (
+              <th className="text-gray-600">{name}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((tickerData) => (
+            <tr>
+              {Object.values(tickerData).map((e) => (
+                <td>{e}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -131,101 +106,60 @@ interface TwentyFourHourTicker {
   count: number;
 }
 
-interface TwentyFourHourTickerTableProps {
-  data: TwentyFourHourTicker;
+const twentyFourHourTickerHeaderNames = [
+  "symbol",
+  "price change",
+  "price change",
+  "price change percent",
+  "weighted average price",
+  "previous close price",
+  "last price",
+  "last quantity",
+  "bid price",
+  "bid quantity",
+  "ask price",
+  "ask quantity",
+  "open price",
+  "high price",
+  "low price",
+  "volume",
+  "quote volume",
+  "open time",
+  "close time",
+  "first id",
+  "last id",
+  "count",
+];
+
+interface TwentyFourHourTickerPairTableProps {
+  data: TwentyFourHourTicker[];
 }
 
-function TwentyFourHourTickerTable({ data }: TwentyFourHourTickerTableProps) {
+function TwentyFourHourTickerPairTable({
+  data,
+}: TwentyFourHourTickerPairTableProps) {
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>24h Ticker</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>priceChange</td>
-          <td>{data.priceChange}</td>
-        </tr>
-        <tr>
-          <td>priceChangePercent</td>
-          <td>{data.priceChangePercent}</td>
-        </tr>
-        <tr>
-          <td>weightedAvgPrice</td>
-          <td>{data.weightedAvgPrice}</td>
-        </tr>
-        <tr>
-          <td>prevClosePrice</td>
-          <td>{data.prevClosePrice}</td>
-        </tr>
-        <tr>
-          <td>lastPrice</td>
-          <td>{data.lastPrice}</td>
-        </tr>
-        <tr>
-          <td>lastQty</td>
-          <td>{data.lastQty}</td>
-        </tr>
-        <tr>
-          <td>bidPrice</td>
-          <td>{data.bidPrice}</td>
-        </tr>
-        <tr>
-          <td>bidQty</td>
-          <td>{data.bidQty}</td>
-        </tr>
-        <tr>
-          <td>askPrice</td>
-          <td>{data.askPrice}</td>
-        </tr>
-        <tr>
-          <td>askQty</td>
-          <td>{data.askQty}</td>
-        </tr>
-        <tr>
-          <td>openPrice</td>
-          <td>{data.openPrice}</td>
-        </tr>
-        <tr>
-          <td>highPrice</td>
-          <td>{data.highPrice}</td>
-        </tr>
-        <tr>
-          <td>lowPrice</td>
-          <td>{data.lowPrice}</td>
-        </tr>
-        <tr>
-          <td>volume</td>
-          <td>{data.volume}</td>
-        </tr>
-        <tr>
-          <td>quoteVolume</td>
-          <td>{data.quoteVolume}</td>
-        </tr>
-        <tr>
-          <td>openTime</td>
-          <td>{data.openTime}</td>
-        </tr>
-        <tr>
-          <td>closeTime</td>
-          <td>{data.closeTime}</td>
-        </tr>
-        <tr>
-          <td>firstId</td>
-          <td>{data.firstId}</td>
-        </tr>
-        <tr>
-          <td>lastId</td>
-          <td>{data.lastId}</td>
-        </tr>
-        <tr>
-          <td>count</td>
-          <td>{data.count}</td>
-        </tr>
-      </tbody>
-    </table>
+    <>
+      <div>24h Ticker</div>
+      <table className="border border-solid bg-green-200">
+        <thead>
+          <tr>
+            {twentyFourHourTickerHeaderNames.map((name) => (
+              <th className="text-gray-600">{name}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((twentyFourHourTickerData) => (
+            <tr>
+              {Object.values(twentyFourHourTickerData).map((e) => (
+                <td>{e}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -245,7 +179,7 @@ interface TradesTableProps {
 
 function TradesTable({ data }: TradesTableProps) {
   return (
-    <table>
+    <table className="border border-solid bg-yellow-200">
       <thead>
         <tr>
           <th>Recent Trades</th>
@@ -345,16 +279,18 @@ export default function PairCurrencyVisualizer() {
         firstCurrencyTradesData &&
         secondCurrencyTradesData && (
           <>
-            <CurrencyData data={tickerData[0]}>
-              <TickerTable data={tickerData[0]} />
+            <TickerPairTable data={tickerData} />
+            <TwentyFourHourTickerPairTable data={twentyFourHourTickerData} />
+            {/* <CurrencyData data={tickerData[0]}>
+              <TickerTableRow data={tickerData[0]} />
               <TwentyFourHourTickerTable data={twentyFourHourTickerData[0]} />
               <TradesTable data={firstCurrencyTradesData[0]} />
             </CurrencyData>
             <CurrencyData data={tickerData[1]}>
-              <TickerTable data={tickerData[1]} />
+              <TickerTableRow data={tickerData[1]} />
               <TwentyFourHourTickerTable data={twentyFourHourTickerData[1]} />
               <TradesTable data={secondCurrencyTradesData[0]} />
-            </CurrencyData>
+            </CurrencyData> */}
           </>
         )}
     </>
