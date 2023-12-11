@@ -2,24 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-interface Ticker {
-  symbol: string;
-  priceChange: string;
-  priceChangePercent: string;
-  weightedAvgPrice: string;
-  openPrice: string;
-  highPrice: string;
-  lowPrice: string;
-  lastPrice: string;
-  volume: string;
-  quoteVolume: string;
-  openTime: number;
-  closeTime: number;
-  firstId: number;
-  lastId: number;
-  count: number;
-}
-
 const tickerTableHeaderNames = [
   "symbol",
   "price change",
@@ -37,30 +19,6 @@ const tickerTableHeaderNames = [
   "last id",
   "count",
 ];
-
-interface TwentyFourHourTicker {
-  symbol: string;
-  priceChange: string;
-  priceChangePercent: string;
-  weightedAvgPrice: string;
-  prevClosePrice: string;
-  lastPrice: string;
-  lastQty: string;
-  bidPrice: string;
-  bidQty: string;
-  askPrice: string;
-  askQty: string;
-  openPrice: string;
-  highPrice: string;
-  lowPrice: string;
-  volume: string;
-  quoteVolume: string;
-  openTime: number;
-  closeTime: number;
-  firstId: number;
-  lastId: number;
-  count: number;
-}
 
 const twentyFourHourTickerHeaderNames = [
   "symbol",
@@ -85,6 +43,58 @@ const twentyFourHourTickerHeaderNames = [
   "last id",
   "count",
 ];
+
+const recentTradesHeaderNames = [
+  "id",
+  "price",
+  "quantity",
+  "quote quantity",
+  "time",
+  "is buyer maker",
+  "is best match",
+];
+
+interface Ticker {
+  symbol: string;
+  priceChange: string;
+  priceChangePercent: string;
+  weightedAvgPrice: string;
+  openPrice: string;
+  highPrice: string;
+  lowPrice: string;
+  lastPrice: string;
+  volume: string;
+  quoteVolume: string;
+  openTime: number;
+  closeTime: number;
+  firstId: number;
+  lastId: number;
+  count: number;
+}
+
+interface TwentyFourHourTicker {
+  symbol: string;
+  priceChange: string;
+  priceChangePercent: string;
+  weightedAvgPrice: string;
+  prevClosePrice: string;
+  lastPrice: string;
+  lastQty: string;
+  bidPrice: string;
+  bidQty: string;
+  askPrice: string;
+  askQty: string;
+  openPrice: string;
+  highPrice: string;
+  lowPrice: string;
+  volume: string;
+  quoteVolume: string;
+  openTime: number;
+  closeTime: number;
+  firstId: number;
+  lastId: number;
+  count: number;
+}
 
 interface PairTableProps<T> {
   data: T[];
@@ -137,16 +147,6 @@ interface Trades {
   isBuyerMaker: boolean;
   isBestMatch: boolean;
 }
-
-const recentTradesHeaderNames = [
-  "id",
-  "price",
-  "quantity",
-  "quote quantity",
-  "time",
-  "is buyer maker",
-  "is best match",
-];
 
 interface TradesTableProps {
   data: Trades[];
