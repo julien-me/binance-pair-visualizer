@@ -234,7 +234,7 @@ export function PairTrades({ children }: PairTradesProps) {
   return (
     <div className="flex flex-col h-full mt-3">
       <div className="text-center">Recent Trades</div>
-      <div className="flex gap-4">{children}</div>
+      <div className="flex gap-2">{children}</div>
     </div>
   );
 }
