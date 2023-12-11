@@ -154,6 +154,38 @@ interface TradesTableProps {
 }
 
 function TradesTable({ data, symbol }: TradesTableProps) {
+  const [sortField, setSortField] = useState<string>("time");
+  const [sortOrder, setSortOrder] = useState<string>("asc");
+
+  const sortData = (field: string) => {
+    const newSortOrder =
+      sortField === field && sortOrder === "asc" ? "desc" : "asc";
+    setSortField(field);
+    setSortOrder(newSortOrder);
+
+    data.sort((a, b) => {
+      if (field === "time") {
+        return newSortOrder === "asc" ? a.time - b.time : b.time - a.time;
+      } else if (field === "price") {
+        return newSortOrder === "asc"
+          ? parseFloat(a.price) - parseFloat(b.price)
+          : parseFloat(b.price) - parseFloat(a.price);
+      } else if (field === "quantity") {
+        return newSortOrder === "asc"
+          ? parseFloat(a.qty) - parseFloat(b.qty)
+          : parseFloat(b.qty) - parseFloat(a.qty);
+      } else {
+        return a.id - b.id;
+      }
+    });
+  };
+
+  const renderSortIndicator = (fieldName: string) => {
+    if (sortField === fieldName) {
+      return sortOrder === "asc" ? " ↑" : " ↓";
+    }
+    return "";
+  };
   return (
     <div className="flex flex-col h-full">
       <div className="text-center">{symbol}</div>
@@ -162,8 +194,14 @@ function TradesTable({ data, symbol }: TradesTableProps) {
           <thead className="sticky top-0 bg-gray-200">
             <tr>
               {recentTradesHeaderNames.map((name) => (
-                <th key={name} className="text-gray-600 p-1">
+                <th
+                  key={name}
+                  scope="col"
+                  className="text-gray-600 p-1"
+                  onClick={() => sortData(name)}
+                >
                   {name}
+                  {renderSortIndicator(name)}
                 </th>
               ))}
             </tr>
