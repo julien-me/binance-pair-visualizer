@@ -156,8 +156,11 @@ interface TradesTableProps {
 export function TradesTable({ data, symbol }: TradesTableProps) {
   const [sortField, setSortField] = useState<string>("time");
   const [sortOrder, setSortOrder] = useState<string>("asc");
+  const sortableFields = ["time", "price", "quantity"];
 
   const sortData = (field: string) => {
+    if (!sortableFields.includes(field)) return;
+
     const newSortOrder =
       sortField === field && sortOrder === "asc" ? "desc" : "asc";
     setSortField(field);
@@ -181,7 +184,7 @@ export function TradesTable({ data, symbol }: TradesTableProps) {
   };
 
   const renderSortIndicator = (fieldName: string) => {
-    if (sortField === fieldName) {
+    if (sortField === fieldName && sortableFields.includes(fieldName)) {
       return sortOrder === "asc" ? " ↑" : " ↓";
     }
     return "";
