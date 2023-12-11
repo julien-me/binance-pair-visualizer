@@ -115,7 +115,7 @@ function PairTable<T extends { symbol: string }>({
           <thead className="bg-gray-200">
             <tr>
               {headerNames.map((name) => (
-                <th key={name} className="text-gray-600 p-1">
+                <th key={name} scope="col" className="text-gray-600 p-1">
                   {name}
                 </th>
               ))}
@@ -172,7 +172,7 @@ function TradesTable({ data, symbol }: TradesTableProps) {
             {data.map((recentTradesData) => (
               <tr key={recentTradesData.id}>
                 {Object.values(recentTradesData).map((e, i) => (
-                  <td key={i} className="p-3">
+                  <td key={`${recentTradesData.id}-${i}`} className="p-3">
                     {e}
                   </td>
                 ))}
@@ -272,13 +272,21 @@ export default function PairCurrencyVisualizer() {
   }
 
   useEffect(() => {
+    let ignore = false;
+
     fetch(`https://api.binance.com/api/v3/exchangeInfo`)
       .then((response) => response.json())
       .then((data) => {
-        setSymbols(data.symbols.map((e: Symbol) => e.symbol));
-        setLoading(false);
+        if (!ignore) {
+          setSymbols(data.symbols.map((e: Symbol) => e.symbol));
+          setLoading(false);
+        }
       })
       .catch((error) => console.error(`Failed to fetch symbols: ${error}`));
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   if (isLoading) return <p>Loading...</p>;
@@ -289,6 +297,7 @@ export default function PairCurrencyVisualizer() {
         onSubmit={(e) => handleSubmit(e)}
         className="flex justify-center m-8 gap-4 h-6"
       >
+        <label htmlFor="currency1">currency 1</label>
         <select
           name="currency1"
           defaultValue={symbols.length > 1 ? symbols[0] : ""}
@@ -299,6 +308,7 @@ export default function PairCurrencyVisualizer() {
             </option>
           ))}
         </select>
+        <label htmlFor="currency2">currency 2</label>
         <select
           name="currency2"
           defaultValue={symbols.length > 1 ? symbols[1] : ""}
