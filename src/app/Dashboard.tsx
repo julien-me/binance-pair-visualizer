@@ -214,7 +214,7 @@ export function TradesTable({ data, symbol }: TradesTableProps) {
               <tr key={recentTradesData.id}>
                 {Object.values(recentTradesData).map((e, i) => (
                   <td key={`${recentTradesData.id}-${i}`} className="p-3">
-                    {e}
+                    {typeof e === "boolean" ? e.toString() : e}
                   </td>
                 ))}
               </tr>
