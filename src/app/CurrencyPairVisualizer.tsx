@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 interface Ticker {
   symbol: string;
@@ -65,15 +65,17 @@ function TickerPairTable({ data }: TickerPairTableProps) {
           <thead>
             <tr>
               {tickerTableHeaderNames.map((name) => (
-                <th className="text-gray-600">{name}</th>
+                <th key={name} className="text-gray-600">
+                  {name}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {data.map((tickerData) => (
-              <tr>
-                {Object.values(tickerData).map((e) => (
-                  <td>{e}</td>
+              <tr key={tickerData.symbol}>
+                {Object.values(tickerData).map((e, i) => (
+                  <td key={i}>{e}</td>
                 ))}
               </tr>
             ))}
@@ -111,7 +113,6 @@ interface TwentyFourHourTicker {
 const twentyFourHourTickerHeaderNames = [
   "symbol",
   "price change",
-  "price change",
   "price change percent",
   "weighted average price",
   "previous close price",
@@ -148,15 +149,17 @@ function TwentyFourHourTickerPairTable({
           <thead>
             <tr>
               {twentyFourHourTickerHeaderNames.map((name) => (
-                <th className="text-gray-600">{name}</th>
+                <th key={name} className="text-gray-600">
+                  {name}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {data.map((twentyFourHourTickerData) => (
-              <tr>
-                {Object.values(twentyFourHourTickerData).map((e) => (
-                  <td>{e}</td>
+              <tr key={twentyFourHourTickerData.symbol}>
+                {Object.values(twentyFourHourTickerData).map((e, i) => (
+                  <td key={i}>{e}</td>
                 ))}
               </tr>
             ))}
@@ -201,15 +204,17 @@ function TradesTable({ data, symbol }: TradesTableProps) {
           <thead className="sticky top-0 bg-yellow-200">
             <tr>
               {recentTradesHeaderNames.map((name) => (
-                <th className="text-gray-600">{name}</th>
+                <th key={name} className="text-gray-600">
+                  {name}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {data.map((recentTradesData) => (
-              <tr>
-                {Object.values(recentTradesData).map((e) => (
-                  <td>{e}</td>
+              <tr key={recentTradesData.id}>
+                {Object.values(recentTradesData).map((e, i) => (
+                  <td key={i}>{e}</td>
                 ))}
               </tr>
             ))}
@@ -220,6 +225,9 @@ function TradesTable({ data, symbol }: TradesTableProps) {
   );
 }
 
+interface Symbol {
+  symbol: string;
+}
 interface PairTradesProps {
   children: JSX.Element[];
 }
@@ -234,6 +242,8 @@ function PairTrades({ children }: PairTradesProps) {
 }
 
 export default function PairCurrencyVisualizer() {
+  const [isLoading, setLoading] = useState(true);
+  const [symbols, setSymbols] = useState<string[]>([]);
   const [tickerData, setMarketData] = useState<Ticker[] | null>(null);
   const [firstSymbol, setFirstSymbol] = useState<string>("");
   const [secondSymbol, setSecondSymbol] = useState<string>("");
@@ -247,12 +257,13 @@ export default function PairCurrencyVisualizer() {
     Trades[] | null
   >(null);
 
-  function handleSubmit(formData: FormData) {
-    // TODO: prevent default
-    const currency1Tmp = formData.get("currency1")?.toString();
-    const currency2Tmp = formData.get("currency2")?.toString();
-    setFirstSymbol(currency1Tmp || "BTCUSDT");
-    setSecondSymbol(currency2Tmp || "BTCUSDT");
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const currency1Tmp = formData.get("currency1") ?? "BTCUSDT";
+    const currency2Tmp = formData.get("currency2") ?? "BNBUSDT";
+    setFirstSymbol(currency1Tmp.toString());
+    setSecondSymbol(currency2Tmp.toString());
 
     if (currency1Tmp === currency2Tmp) {
       console.error("Error: Same currency");
@@ -263,34 +274,71 @@ export default function PairCurrencyVisualizer() {
       `https://api.binance.com/api/v3/ticker?symbols=%5B%22${currency1Tmp}%22,%22${currency2Tmp}%22%5D`
     )
       .then((response) => response.json())
-      .then((data) => setMarketData(data));
+      .then((data) => setMarketData(data))
+      .catch((error) => console.error(`Failed to fetch ticker data: ${error}`));
 
     fetch(
       `https://api.binance.com/api/v3/ticker/24hr?symbols=%5B%22${currency1Tmp}%22,%22${currency2Tmp}%22%5D`
     )
       .then((response) => response.json())
-      .then((data) => setTwentyFourHourTickerData(data));
+      .then((data) => setTwentyFourHourTickerData(data))
+      .catch((error) =>
+        console.error(`Failed to fetch 24h ticker data: ${error}`)
+      );
 
     fetch(`https://api.binance.com/api/v3/trades?symbol=${currency1Tmp}`)
       .then((response) => response.json())
-      .then((data) => setFirstCurrencyTradesData(data));
+      .then((data) => setFirstCurrencyTradesData(data))
+      .catch((error) =>
+        console.error(
+          `Failed to fetch recent trades for ${currency1Tmp}: ${error}`
+        )
+      );
 
     fetch(`https://api.binance.com/api/v3/trades?symbol=${currency2Tmp}`)
       .then((response) => response.json())
-      .then((data) => setSecondCurrencyTradesData(data));
-    console.log("hello");
+      .then((data) => setSecondCurrencyTradesData(data))
+      .catch((error) =>
+        console.error(
+          `Failed to fetch recent trades for ${currency2Tmp}: ${error}`
+        )
+      );
   }
+
+  useEffect(() => {
+    fetch(`https://api.binance.com/api/v3/exchangeInfo`)
+      .then((response) => response.json())
+      .then((data) => {
+        setSymbols(data.symbols.map((e: Symbol) => e.symbol));
+        setLoading(false);
+      })
+      .catch((error) => console.error(`Failed to fetch symbols: ${error}`));
+  }, []);
+
+  if (isLoading) return <p>Loading...</p>;
 
   return (
     <>
-      <form action={handleSubmit}>
-        <select name="currency1" defaultValue="BTCUSDT">
-          <option value="BTCUSDT">BTCUSDT</option>
-          <option value="BNBUSDT">BNBUSDT</option>
+      <form onSubmit={(e) => handleSubmit(e)}>
+        <select
+          name="currency1"
+          defaultValue={symbols.length ? symbols[0] : ""}
+        >
+          {symbols.map((symbol) => (
+            <option key={symbol} value={symbol}>
+              {symbol}
+            </option>
+          ))}
         </select>
-        <select name="currency2" defaultValue="BNBUSDT">
-          <option value="BTCUSDT">BTCUSDT</option>
-          <option value="BNBUSDT">BNBUSDT</option>
+        <select
+          name="currency2"
+          defaultValue={symbols.length ? symbols[0] : ""}
+        >
+          {symbols.map((symbol) => (
+            <option key={symbol} value={symbol}>
+              {symbol}
+            </option>
+          ))}
         </select>
         <button type="submit">Get Market Data</button>
       </form>
